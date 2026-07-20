@@ -81,7 +81,8 @@ if (
 }
 
 if (
-  !articleHtml.includes("THINKING TIME / 10 SEC.") ||
+  !articleHtml.includes("読む前に、10秒だけ考えてみて。") ||
+  articleHtml.includes("THINKING TIME / 10 SEC.") ||
   !articleHtml.includes("「痛いから」以外で。") ||
   !articleHtml.includes("人類は、この雑なゲームに飽きた。") ||
   !articleHtml.includes("暴力を、面倒な手続きのいちばん奥に隠したことだ。")

@@ -7,7 +7,7 @@ draft: false
 featured: true
 ---
 
-> **THINKING TIME / 10 SEC.**
+> **読む前に、10秒だけ考えてみて。**
 >
 > 人を殴っちゃいけないのは、なんで？
 >
