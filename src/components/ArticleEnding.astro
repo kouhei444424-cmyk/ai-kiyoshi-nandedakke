@@ -1,15 +1,18 @@
 ---
 const rawAffiliateUrl = import.meta.env.AFFILIATE_URL?.trim();
-let affiliateUrl: string | undefined;
+const rawAdultLinkUrl = import.meta.env.ADULT_LINK_URL?.trim();
+const rawDestinationUrl = rawAffiliateUrl || rawAdultLinkUrl;
+const isAffiliate = Boolean(rawAffiliateUrl);
+let destinationUrl: string | undefined;
 
-if (rawAffiliateUrl) {
+if (rawDestinationUrl) {
   try {
-    const parsedUrl = new URL(rawAffiliateUrl);
+    const parsedUrl = new URL(rawDestinationUrl);
     if (parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:") {
-      affiliateUrl = parsedUrl.toString();
+      destinationUrl = parsedUrl.toString();
     }
   } catch {
-    affiliateUrl = undefined;
+    destinationUrl = undefined;
   }
 }
 ---
@@ -17,19 +20,27 @@ if (rawAffiliateUrl) {
 <footer class="article-ending">
   <p class="article-ending__lead">頭疲れたら行ってらっしゃい。</p>
   {
-    affiliateUrl && (
-      <div class="article-ending__affiliate">
-        <span class="article-ending__ad-label">広告</span>
-        <a
-          href={affiliateUrl}
-          target="_blank"
-          rel="sponsored nofollow noopener"
-          data-affiliate-link
-        >
-          ちょっと休みに行く
-          <span aria-hidden="true">↗</span>
-        </a>
-      </div>
+    destinationUrl && (
+      <>
+        <div class="article-ending__affiliate">
+          <span class="article-ending__ad-label">
+            {isAffiliate ? "広告・18禁" : "18禁"}
+          </span>
+          <a
+            href={destinationUrl}
+            target="_blank"
+            rel={isAffiliate ? "sponsored nofollow noopener" : "nofollow noopener"}
+            data-affiliate-link={isAffiliate ? "true" : undefined}
+            aria-describedby="adult-link-notice"
+          >
+            FANZAトップへ
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <p id="adult-link-notice" class="article-ending__adult-notice">
+          18歳未満の方は閲覧できません。リンク先は成人向けサイトです。
+        </p>
+      </>
     )
   }
 </footer>

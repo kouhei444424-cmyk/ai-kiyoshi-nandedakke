@@ -510,6 +510,14 @@ a:focus-visible {
   font-size: 0.82rem;
 }
 
+.article-ending__adult-notice {
+  max-width: 32rem;
+  margin: 0.85rem 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.7;
+}
+
 .article-after-nav {
   margin-top: 4rem;
   padding-top: 1.5rem;
