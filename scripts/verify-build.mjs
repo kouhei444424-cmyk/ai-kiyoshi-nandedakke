@@ -70,6 +70,13 @@ if (
 }
 
 if (
+  !articleHtml.includes("人類は、この雑なゲームに飽きた。") ||
+  !articleHtml.includes("暴力を、面倒な手続きのいちばん奥に隠したことだ。")
+) {
+  throw new Error("新しい文体の記事本文が出力されていません。");
+}
+
+if (
   !articleHtml.includes("FANZAトップへ") ||
   !articleHtml.includes("考えるのが疲れたら行ってらっしゃい。") ||
   !articleHtml.includes("18歳未満の方は閲覧できません。") ||
