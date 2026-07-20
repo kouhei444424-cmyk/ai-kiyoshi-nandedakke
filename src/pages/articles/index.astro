@@ -21,13 +21,20 @@ const hasNextPage = articles.length > pageSize;
       <span>{articles.length}個。答えは、まだ仮です。</span>
     </header>
 
-    <div class="question-list">
-      {
-        firstPage.map((article, index) => (
-          <QuestionCard article={article} number={articles.length - index} />
-        ))
-      }
-    </div>
+    {
+      firstPage.length > 0 ? (
+        <div class="question-list">
+          {firstPage.map((article, index) => (
+            <QuestionCard article={article} number={articles.length - index} />
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>まだ、問いはありません。</p>
+          <span>最初の問いを考えているところです。</span>
+        </div>
+      )
+    }
 
     {
       hasNextPage && (

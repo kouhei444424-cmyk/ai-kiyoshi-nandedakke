@@ -34,15 +34,26 @@ const latestArticles = articles.slice(0, 6);
       <h2 id="latest-heading">今のところ、こんなこと。</h2>
     </div>
 
-    <div class="question-list">
-      {
-        latestArticles.map((article, index) => (
-          <QuestionCard article={article} number={articles.length - index} />
-        ))
-      }
-    </div>
+    {
+      latestArticles.length > 0 ? (
+        <>
+          <div class="question-list">
+            {latestArticles.map((article, index) => (
+              <QuestionCard article={article} number={articles.length - index} />
+            ))}
+          </div>
 
-    <a class="text-link" href="/articles/">問いを全部見る →</a>
+          <a class="text-link" href="/articles/">
+            問いを全部見る →
+          </a>
+        </>
+      ) : (
+        <div class="empty-state">
+          <p>まだ、問いはありません。</p>
+          <span>考えはじめたら、ここに増えます。</span>
+        </div>
+      )
+    }
   </section>
 
   <section class="home-statement">
