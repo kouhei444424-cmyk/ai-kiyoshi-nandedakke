@@ -49,11 +49,11 @@ const articleHtml = await readFile(
 const rssXml = await readFile(join(dist, "rss.xml"), "utf8");
 const redirects = await readFile(join(dist, "_redirects"), "utf8");
 
-if (!homeHtml.includes("人はなんで殴っちゃいけないんだっけ。")) {
+if (!homeHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
   throw new Error("トップページに一本目の記事がありません。");
 }
 
-if (!archiveHtml.includes("人はなんで殴っちゃいけないんだっけ。")) {
+if (!archiveHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
   throw new Error("記事一覧に一本目の記事がありません。");
 }
 
@@ -71,6 +71,7 @@ if (
 
 if (
   !articleHtml.includes("FANZAトップへ") ||
+  !articleHtml.includes("考えるのが疲れたら行ってらっしゃい。") ||
   !articleHtml.includes("18歳未満の方は閲覧できません。") ||
   !articleHtml.includes("https://www.dmm.co.jp/top/")
 ) {
