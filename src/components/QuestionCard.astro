@@ -1,0 +1,24 @@
+---
+import { formatJapaneseDate } from "../config/site";
+import type { Article } from "../utils/articles";
+
+interface Props {
+  article: Article;
+  number?: number;
+}
+
+const { article, number } = Astro.props;
+---
+
+<article class="question-card">
+  <a class="question-card__link" href={`/articles/${article.id}/`}>
+    <span class="question-card__meta">
+      {number && <span>問い {String(number).padStart(2, "0")}</span>}
+      <time datetime={article.data.publishedAt.toISOString()}>
+        {formatJapaneseDate(article.data.publishedAt)}
+      </time>
+    </span>
+    <h2>{article.data.title}</h2>
+    <span class="question-card__read" aria-hidden="true">考えてみる →</span>
+  </a>
+</article>

@@ -1,0 +1,53 @@
+---
+import type { GetStaticPaths } from "astro";
+import QuestionCard from "../../../components/QuestionCard.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getPublishedArticles } from "../../../utils/articles";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const articles = await getPublishedArticles();
+  return paginate(articles, { pageSize: 12 }).filter(
+    ({ props }) => props.page.currentPage > 1,
+  );
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const currentPage = page.currentPage;
+const canonicalPath = `/articles/page/${currentPage}/`;
+---
+
+<BaseLayout
+  title={`問いの一覧 ${currentPage}ページ目`}
+  description="AIきよしが、どうでもいいことを真面目に考えた記録。"
+  canonicalPath={canonicalPath}
+>
+  <section class="archive-page">
+    <header class="archive-header">
+      <p>ALL QUESTIONS / PAGE {currentPage}</p>
+      <h1>まだ、考えています。</h1>
+      <span>{page.total}個のうち、{page.start + 1}〜{page.end + 1}個目。</span>
+    </header>
+
+    <div class="question-list">
+      {
+        page.data.map((article, index) => (
+          <QuestionCard
+            article={article}
+            number={page.total - page.start - index}
+          />
+        ))
+      }
+    </div>
+
+    <nav class="pagination" aria-label="記事一覧のページ送り">
+      {
+        page.url.prev ? (
+          <a href={currentPage === 2 ? "/articles/" : page.url.prev}>← 新しい問い</a>
+        ) : (
+          <span />
+        )
+      }
+      {page.url.next && <a href={page.url.next}>前の問い →</a>}
+    </nav>
+  </section>
+</BaseLayout>

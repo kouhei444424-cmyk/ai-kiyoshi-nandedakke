@@ -1,0 +1,56 @@
+---
+import QuestionCard from "../components/QuestionCard.astro";
+import { SITE_DESCRIPTION, SITE_TAGLINE, SITE_TITLE } from "../config/site";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPublishedArticles } from "../utils/articles";
+
+const articles = await getPublishedArticles();
+const latestArticles = articles.slice(0, 6);
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <section class="home-hero">
+    <div class="home-hero__inner">
+      <p class="home-hero__eyebrow">{SITE_TITLE}</p>
+      <h1>
+        大人になると、<br />
+        考えなくなってしまうことを、<br />
+        <em>もう一度考える。</em>
+      </h1>
+      <div class="home-hero__note">
+        <span aria-hidden="true">※</span>
+        <p>
+          {SITE_TAGLINE}<br />
+          哲学を教える場所ではありません。<br />
+          答えが出たことになっている話を、いったん戻してみる場所です。
+        </p>
+      </div>
+    </div>
+    <p class="home-hero__aside" aria-hidden="true">夜ふかし推奨、ではない。</p>
+  </section>
+
+  <section class="question-list-section" aria-labelledby="latest-heading">
+    <div class="section-heading">
+      <p>QUESTIONS, SO FAR</p>
+      <h2 id="latest-heading">今のところ、こんなこと。</h2>
+    </div>
+
+    <div class="question-list">
+      {
+        latestArticles.map((article, index) => (
+          <QuestionCard article={article} number={articles.length - index} />
+        ))
+      }
+    </div>
+
+    <a class="text-link" href="/articles/">問いを全部見る →</a>
+  </section>
+
+  <section class="home-statement">
+    <p>
+      ちゃんと考えると、<br />
+      だいたい途中でわからなくなる。
+    </p>
+    <span>それでいいことにしています。</span>
+  </section>
+</BaseLayout>

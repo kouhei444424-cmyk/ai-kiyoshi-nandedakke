@@ -1,0 +1,35 @@
+---
+const rawAffiliateUrl = import.meta.env.AFFILIATE_URL?.trim();
+let affiliateUrl: string | undefined;
+
+if (rawAffiliateUrl) {
+  try {
+    const parsedUrl = new URL(rawAffiliateUrl);
+    if (parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:") {
+      affiliateUrl = parsedUrl.toString();
+    }
+  } catch {
+    affiliateUrl = undefined;
+  }
+}
+---
+
+<footer class="article-ending">
+  <p class="article-ending__lead">頭疲れたら行ってらっしゃい。</p>
+  {
+    affiliateUrl && (
+      <div class="article-ending__affiliate">
+        <span class="article-ending__ad-label">広告</span>
+        <a
+          href={affiliateUrl}
+          target="_blank"
+          rel="sponsored nofollow noopener"
+          data-affiliate-link
+        >
+          ちょっと休みに行く
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    )
+  }
+</footer>

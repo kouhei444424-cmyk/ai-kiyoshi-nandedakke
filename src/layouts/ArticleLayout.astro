@@ -1,0 +1,85 @@
+---
+import ArticleEnding from "../components/ArticleEnding.astro";
+import { formatJapaneseDate, SITE_TITLE } from "../config/site";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  slug: string;
+}
+
+const { title, description, publishedAt, updatedAt, slug } = Astro.props;
+const canonicalPath = `/articles/${slug}/`;
+const siteOrigin = Astro.site ?? new URL(Astro.url.origin);
+const articleUrl = new URL(canonicalPath, siteOrigin);
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  description,
+  datePublished: publishedAt.toISOString(),
+  dateModified: (updatedAt ?? publishedAt).toISOString(),
+  inLanguage: "ja-JP",
+  mainEntityOfPage: articleUrl.toString(),
+  author: {
+    "@type": "Organization",
+    name: "AIきよし",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: SITE_TITLE,
+  },
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  type="article"
+  publishedTime={publishedAt.toISOString()}
+  updatedTime={updatedAt?.toISOString()}
+>
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify(structuredData)}
+  />
+
+  <div class="article-page">
+    <article class="article">
+      <header class="article__header">
+        <a class="article__back" href="/articles/">← 問いの一覧</a>
+        <p class="article__label">今日、考えること。</p>
+        <h1>{title}</h1>
+        <p class="article__description">{description}</p>
+        <div class="article__dates">
+          <time datetime={publishedAt.toISOString()}>
+            {formatJapaneseDate(publishedAt)}
+          </time>
+          {
+            updatedAt && (
+              <span>
+                更新 {formatJapaneseDate(updatedAt)}
+              </span>
+            )
+          }
+        </div>
+      </header>
+
+      <div class="article-body">
+        <slot />
+      </div>
+
+      <ArticleEnding />
+    </article>
+
+    <nav class="article-after-nav" aria-label="記事を読み終えた後のナビゲーション">
+      <a href="/articles/">ほかの「なんでだっけ。」を見る</a>
+    </nav>
+  </div>
+</BaseLayout>

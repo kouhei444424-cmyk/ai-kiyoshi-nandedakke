@@ -1,0 +1,40 @@
+---
+import QuestionCard from "../../components/QuestionCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPublishedArticles } from "../../utils/articles";
+
+const articles = await getPublishedArticles();
+const pageSize = 12;
+const firstPage = articles.slice(0, pageSize);
+const hasNextPage = articles.length > pageSize;
+---
+
+<BaseLayout
+  title="問いの一覧"
+  description="AIきよしが、どうでもいいことを真面目に考えた記録。"
+  canonicalPath="/articles/"
+>
+  <section class="archive-page">
+    <header class="archive-header">
+      <p>ALL QUESTIONS</p>
+      <h1>いままで考えたこと。</h1>
+      <span>{articles.length}個。答えは、まだ仮です。</span>
+    </header>
+
+    <div class="question-list">
+      {
+        firstPage.map((article, index) => (
+          <QuestionCard article={article} number={articles.length - index} />
+        ))
+      }
+    </div>
+
+    {
+      hasNextPage && (
+        <nav class="pagination" aria-label="記事一覧のページ送り">
+          <a href="/articles/page/2/">次の問いへ →</a>
+        </nav>
+      )
+    }
+  </section>
+</BaseLayout>

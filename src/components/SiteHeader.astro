@@ -1,0 +1,17 @@
+---
+import { SITE_TITLE } from "../config/site";
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href="/" aria-label={`${SITE_TITLE} トップへ`}>
+      <span class="site-brand__small">AIきよしの思考遊び</span>
+      <span class="site-brand__main">{SITE_TITLE}</span>
+    </a>
+
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <a href="/articles/">問い</a>
+      <a href="/about/">この場所</a>
+    </nav>
+  </div>
+</header>
