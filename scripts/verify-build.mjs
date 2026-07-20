@@ -70,10 +70,16 @@ if (
 }
 
 if (
+  !articleHtml.includes("THINKING TIME / 10 SEC.") ||
+  !articleHtml.includes("「痛いから」以外で。") ||
   !articleHtml.includes("人類は、この雑なゲームに飽きた。") ||
   !articleHtml.includes("暴力を、面倒な手続きのいちばん奥に隠したことだ。")
 ) {
   throw new Error("新しい文体の記事本文が出力されていません。");
+}
+
+if (articleHtml.includes('class="article__description"')) {
+  throw new Error("記事ページに不要なサブタイトルが表示されています。");
 }
 
 if (

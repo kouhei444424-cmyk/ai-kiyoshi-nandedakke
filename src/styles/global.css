@@ -556,14 +556,6 @@ a:focus-visible {
   text-wrap: balance;
 }
 
-.article__description {
-  max-width: 38rem;
-  margin: 1.25rem 0 0;
-  color: var(--muted-strong);
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
-
 .article__dates {
   display: flex;
   margin-top: 1.25rem;
