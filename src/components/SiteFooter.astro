@@ -1,10 +1,17 @@
 ---
+import { getPublishedArticles } from "../utils/articles";
+
 const year = new Date().getFullYear();
+const articles = await getPublishedArticles();
+const count = String(articles.length).padStart(3, "0");
 ---
 
 <footer class="site-footer">
   <div class="site-footer__inner">
     <p>正解は置いていません。問いだけ、たまに増えます。</p>
+    <span class="site-footer__counter" aria-hidden="true">
+      問いの数 <strong>{count}</strong>
+    </span>
     <p class="site-footer__copyright">© {year}</p>
   </div>
 </footer>

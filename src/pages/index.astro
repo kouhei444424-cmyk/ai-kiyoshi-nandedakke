@@ -11,7 +11,11 @@ const latestArticles = articles.slice(0, 6);
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
   <section class="home-hero">
     <div class="home-hero__inner">
-      <p class="home-hero__eyebrow">{SITE_TITLE}</p>
+      <ul class="home-hero__badges" aria-hidden="true">
+        <li><span class="sticker">ISSUE {String(articles.length).padStart(3, "0")}</span></li>
+        <li><span class="sticker">深夜のメモ</span></li>
+        <li><span class="sticker">読まなくても困らない</span></li>
+      </ul>
       <h1>
         大人になると、<br />
         考えなくなってしまうことを、<br />
@@ -24,8 +28,8 @@ const latestArticles = articles.slice(0, 6);
           答えが出たことになっている話を、いったん戻してみる場所です。
         </p>
       </div>
+      <p class="home-hero__aside">夜ふかし推奨、ではない。</p>
     </div>
-    <p class="home-hero__aside" aria-hidden="true">夜ふかし推奨、ではない。</p>
   </section>
 
   <section class="question-list-section" aria-labelledby="latest-heading">
