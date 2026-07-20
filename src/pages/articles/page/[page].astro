@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from "astro";
 import QuestionCard from "../../../components/QuestionCard.astro";
+import ViewCounterClient from "../../../components/ViewCounterClient.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { getPublishedArticles } from "../../../utils/articles";
 
@@ -50,4 +51,6 @@ const canonicalPath = `/articles/page/${currentPage}/`;
       {page.url.next && <a href={page.url.next}>前の問い →</a>}
     </nav>
   </section>
+
+  <ViewCounterClient />
 </BaseLayout>

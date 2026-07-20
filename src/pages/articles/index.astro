@@ -1,5 +1,6 @@
 ---
 import QuestionCard from "../../components/QuestionCard.astro";
+import ViewCounterClient from "../../components/ViewCounterClient.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getPublishedArticles } from "../../utils/articles";
 
@@ -44,4 +45,6 @@ const hasNextPage = articles.length > pageSize;
       )
     }
   </section>
+
+  <ViewCounterClient />
 </BaseLayout>

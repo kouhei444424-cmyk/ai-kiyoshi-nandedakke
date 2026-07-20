@@ -1,5 +1,6 @@
 ---
 import ArticleEnding from "../components/ArticleEnding.astro";
+import ViewCounterClient from "../components/ViewCounterClient.astro";
 import { formatJapaneseDate, SITE_TITLE } from "../config/site";
 import BaseLayout from "./BaseLayout.astro";
 
@@ -52,17 +53,31 @@ const structuredData = {
         <a class="article__back" href="/articles/">← 問いの一覧</a>
         <p class="article__label">今日、考えること。</p>
         <h1>{title}</h1>
-        <div class="article__dates">
-          <time datetime={publishedAt.toISOString()}>
-            {formatJapaneseDate(publishedAt)}
-          </time>
-          {
-            updatedAt && (
-              <span>
-                更新 {formatJapaneseDate(updatedAt)}
-              </span>
-            )
-          }
+        <div class="article__meta-row">
+          <div class="article__dates">
+            <time datetime={publishedAt.toISOString()}>
+              {formatJapaneseDate(publishedAt)}
+            </time>
+            {
+              updatedAt && (
+                <span>
+                  更新 {formatJapaneseDate(updatedAt)}
+                </span>
+              )
+            }
+          </div>
+          <span
+            class="article__views"
+            data-view-counter={canonicalPath}
+            data-view-track={canonicalPath}
+            data-view-state="loading"
+            role="status"
+            aria-live="polite"
+            aria-label="閲覧数を読み込み中"
+          >
+            <strong data-view-counter-value>—</strong>
+            <span>View</span>
+          </span>
         </div>
       </header>
 
@@ -77,4 +92,6 @@ const structuredData = {
       <a href="/articles/">ほかの「なんでだっけ。」を見る</a>
     </nav>
   </div>
+
+  <ViewCounterClient />
 </BaseLayout>

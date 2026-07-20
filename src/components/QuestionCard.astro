@@ -8,17 +8,29 @@ interface Props {
 }
 
 const { article, number } = Astro.props;
+const articlePath = `/articles/${article.id}/`;
 ---
 
 <article class="question-card">
-  <a class="question-card__link" href={`/articles/${article.id}/`}>
-    <span class="question-card__meta">
-      {number && <span>問い {String(number).padStart(2, "0")}</span>}
-      <time datetime={article.data.publishedAt.toISOString()}>
-        {formatJapaneseDate(article.data.publishedAt)}
-      </time>
+  <a class="question-card__link" href={articlePath}>
+    <span class="question-card__main">
+      <span class="question-card__meta">
+        {number && <span>問い {String(number).padStart(2, "0")}</span>}
+        <time datetime={article.data.publishedAt.toISOString()}>
+          {formatJapaneseDate(article.data.publishedAt)}
+        </time>
+      </span>
+      <h2>{article.data.title}</h2>
+      <span class="question-card__read" aria-hidden="true">考えてみる →</span>
     </span>
-    <h2>{article.data.title}</h2>
-    <span class="question-card__read" aria-hidden="true">考えてみる →</span>
+    <span
+      class="question-card__views"
+      data-view-counter={articlePath}
+      data-view-state="loading"
+      aria-label="閲覧数を読み込み中"
+    >
+      <strong data-view-counter-value>—</strong>
+      <span>View</span>
+    </span>
   </a>
 </article>

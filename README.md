@@ -24,7 +24,9 @@
 - Markdown / Astro Content Collections
 - 静的HTML
 - Cloudflare Pages
-- CMS・データベースなし
+- Cloudflare Pages Functions
+- Cloudflare D1（閲覧カウンター専用）
+- CMSなし
 
 ## ローカルで確認する
 
@@ -104,6 +106,27 @@ AFFILIATE_URL=https://example.com/
 - 成人向けリンクには「18禁」と注意文を表示
 
 静的サイトのため、URL変更後は再デプロイが必要です。
+
+## 閲覧カウンター
+
+トップページの通算訪問数と、記事ごとの閲覧数をD1へ保存します。
+
+- トップページを開く：`/`の閲覧数を加算
+- 記事ページを開く：該当する記事URLの閲覧数を加算
+- 記事一覧を開く：数字を表示するだけで加算しない
+- 同じブラウザ・同じページでは、30分以内の再読み込みを重複計上しない
+- 検索エンジンやSNSプレビューなど、代表的なBotのアクセスは加算しない
+- 個人情報、IPアドレス、ブラウザIDはD1へ保存しない
+
+D1には次のマイグレーションを適用します。
+
+```bash
+npx wrangler d1 execute ai-kiyoshi-page-views \
+  --remote \
+  --file=migrations/0001_page_views.sql
+```
+
+表示用カウンターは読者向けの目安です。正確なアクセス分析にはCloudflare Web Analyticsを使用します。
 
 ## Cloudflare Pagesへ公開する
 

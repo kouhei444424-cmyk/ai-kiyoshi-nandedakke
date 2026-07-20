@@ -5,5 +5,12 @@
   "compatibility_date": "2026-07-20",
   "vars": {
     "SITE_URL": "https://ai-kiyoshi-nandedakke.pages.dev"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "VIEW_DB",
+      "database_name": "ai-kiyoshi-page-views",
+      "database_id": "724e520c-62db-48a4-b88d-da8286b3cc1f"
+    }
+  ]
 }

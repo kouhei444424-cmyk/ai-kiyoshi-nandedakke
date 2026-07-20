@@ -1,0 +1,142 @@
+<script>
+  const COUNT_INTERVAL_MS = 30 * 60 * 1000;
+  const endpoint = "/api/views";
+  const numberFormatter = new Intl.NumberFormat("ja-JP");
+
+  function storageKey(path: string) {
+    return `page-view-counted:${path}`;
+  }
+
+  function shouldCount(path: string) {
+    try {
+      const countedAt = Number(localStorage.getItem(storageKey(path)) ?? 0);
+      return Date.now() - countedAt >= COUNT_INTERVAL_MS;
+    } catch {
+      return true;
+    }
+  }
+
+  function rememberCount(path: string) {
+    try {
+      localStorage.setItem(storageKey(path), String(Date.now()));
+    } catch {
+      // Storage may be unavailable in private browsing. Counting still works.
+    }
+  }
+
+  function renderCount(path: string, count: number) {
+    const formattedCount = numberFormatter.format(count);
+
+    for (const element of document.querySelectorAll<HTMLElement>(
+      `[data-view-counter="${CSS.escape(path)}"]`,
+    )) {
+      const value = element.querySelector<HTMLElement>(
+        "[data-view-counter-value]",
+      );
+
+      if (value) {
+        value.textContent = formattedCount;
+      }
+
+      element.dataset.viewState = "ready";
+      element.setAttribute("aria-label", `${formattedCount}回閲覧されています`);
+    }
+  }
+
+  function renderError() {
+    for (const element of document.querySelectorAll<HTMLElement>(
+      "[data-view-counter]",
+    )) {
+      element.dataset.viewState = "error";
+      element.setAttribute("aria-label", "閲覧数を取得できませんでした");
+    }
+  }
+
+  async function increment(path: string) {
+    if (!shouldCount(path)) {
+      return;
+    }
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ path }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`View counter returned ${response.status}.`);
+    }
+
+    const data = await response.json();
+
+    if (typeof data.count === "number") {
+      renderCount(path, data.count);
+    }
+
+    if (data.counted) {
+      rememberCount(path);
+    }
+  }
+
+  async function loadCounts(paths: string[]) {
+    const search = new URLSearchParams();
+
+    for (const path of paths) {
+      search.append("path", path);
+    }
+
+    const response = await fetch(`${endpoint}?${search.toString()}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`View counter returned ${response.status}.`);
+    }
+
+    const data = await response.json();
+
+    for (const [path, count] of Object.entries(data.counts ?? {})) {
+      if (typeof count === "number") {
+        renderCount(path, count);
+      }
+    }
+  }
+
+  async function initializeViewCounters() {
+    const counterElements = [
+      ...document.querySelectorAll<HTMLElement>("[data-view-counter]"),
+    ];
+    const paths = [
+      ...new Set(
+        counterElements
+          .map((element) => element.dataset.viewCounter)
+          .filter((path): path is string => Boolean(path)),
+      ),
+    ];
+
+    if (paths.length === 0) {
+      return;
+    }
+
+    const tracker = document.querySelector<HTMLElement>("[data-view-track]");
+    const trackedPath = tracker?.dataset.viewTrack;
+
+    try {
+      if (trackedPath) {
+        await increment(trackedPath);
+      }
+
+      await loadCounts(paths);
+    } catch (error) {
+      console.error("View counter failed to load.", error);
+      renderError();
+    }
+  }
+
+  void initializeViewCounters();
+</script>
+

@@ -19,9 +19,17 @@ const requiredFiles = [
   "og.png",
   "_redirects",
 ];
+const requiredSourceFiles = [
+  "functions/api/views.js",
+  "migrations/0001_page_views.sql",
+];
 
 for (const relativePath of requiredFiles) {
   await access(join(dist, relativePath));
+}
+
+for (const relativePath of requiredSourceFiles) {
+  await access(join(root, relativePath));
 }
 
 try {
@@ -64,12 +72,30 @@ if (!homeHtml.includes("人をなんで殴っちゃいけないんだっけ。")
   throw new Error("トップページに一本目の記事がありません。");
 }
 
+if (
+  !homeHtml.includes("通算訪問数") ||
+  !homeHtml.includes('data-view-counter="/"') ||
+  !homeHtml.includes('data-view-track="/"') ||
+  !homeHtml.includes("data-view-counter-value")
+) {
+  throw new Error("トップページに通算訪問数カウンターがありません。");
+}
+
 if (homeHtml.includes('href="/rss.xml"')) {
   throw new Error("トップページに削除したRSSリンクが残っています。");
 }
 
 if (!archiveHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
   throw new Error("記事一覧に一本目の記事がありません。");
+}
+
+if (
+  !archiveHtml.includes(
+    'data-view-counter="/articles/hito-wa-nande-nagutte-wa-ikenai/"',
+  ) ||
+  !archiveHtml.includes("View")
+) {
+  throw new Error("記事一覧に記事別の閲覧数表示がありません。");
 }
 
 if (
@@ -95,6 +121,15 @@ if (articleHtml.includes('class="article__description"')) {
 }
 
 if (
+  !articleHtml.includes(
+    'data-view-track="/articles/hito-wa-nande-nagutte-wa-ikenai/"',
+  ) ||
+  !articleHtml.includes("article__views")
+) {
+  throw new Error("記事ページに閲覧数カウンターがありません。");
+}
+
+if (
   !articleHtml.includes("FANZAトップへ") ||
   !articleHtml.includes("考えるのが疲れたら行ってらっしゃい。") ||
   !articleHtml.includes("18歳未満の方は閲覧できません。") ||
@@ -110,5 +145,5 @@ for (const slug of removedSlugs) {
 }
 
 console.log(
-  "Build verification passed: 1 anonymous article, adult notice and sitemap.",
+  "Build verification passed: 1 anonymous article, view counters, adult notice and sitemap.",
 );

@@ -1,5 +1,6 @@
 ---
 import QuestionCard from "../components/QuestionCard.astro";
+import ViewCounterClient from "../components/ViewCounterClient.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../config/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getPublishedArticles } from "../utils/articles";
@@ -11,24 +12,43 @@ const latestArticles = articles.slice(0, 6);
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
   <section class="home-hero">
     <div class="home-hero__inner">
-      <ul class="home-hero__badges" aria-hidden="true">
-        <li><span class="sticker">ISSUE {String(articles.length).padStart(3, "0")}</span></li>
-        <li><span class="sticker">深夜のメモ</span></li>
-        <li><span class="sticker">読まなくても困らない</span></li>
-      </ul>
-      <h1>
-        大人になると、<br />
-        考えなくなってしまうことを、<br />
-        <em>もう一度考える。</em>
-      </h1>
-      <div class="home-hero__note">
-        <span aria-hidden="true">※</span>
-        <p>
-          哲学を教える場所ではありません。<br />
-          答えが出たことになっている話を、いったん戻してみる場所です。
-        </p>
+      <div class="home-hero__copy">
+        <ul class="home-hero__badges" aria-hidden="true">
+          <li><span class="sticker">ISSUE {String(articles.length).padStart(3, "0")}</span></li>
+          <li><span class="sticker">深夜のメモ</span></li>
+          <li><span class="sticker">読まなくても困らない</span></li>
+        </ul>
+        <h1>
+          大人になると、<br />
+          考えなくなってしまうことを、<br />
+          <em>もう一度考える。</em>
+        </h1>
+        <div class="home-hero__note">
+          <span aria-hidden="true">※</span>
+          <p>
+            哲学を教える場所ではありません。<br />
+            答えが出たことになっている話を、いったん戻してみる場所です。
+          </p>
+        </div>
+        <p class="home-hero__aside">夜ふかし推奨、ではない。</p>
       </div>
-      <p class="home-hero__aside">夜ふかし推奨、ではない。</p>
+
+      <div
+        class="view-counter view-counter--hero"
+        data-view-counter="/"
+        data-view-track="/"
+        data-view-state="loading"
+        role="status"
+        aria-live="polite"
+        aria-label="通算訪問数を読み込み中"
+      >
+        <span class="view-counter__label">通算訪問数</span>
+        <span class="view-counter__value">
+          <strong data-view-counter-value>—</strong>
+          <span>View</span>
+        </span>
+        <span class="view-counter__note">ここが開かれた回数。</span>
+      </div>
     </div>
   </section>
 
@@ -67,4 +87,6 @@ const latestArticles = articles.slice(0, 6);
     </p>
     <span>それでいいことにしています。</span>
   </section>
+
+  <ViewCounterClient />
 </BaseLayout>
