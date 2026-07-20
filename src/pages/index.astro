@@ -1,6 +1,6 @@
 ---
 import QuestionCard from "../components/QuestionCard.astro";
-import { SITE_DESCRIPTION, SITE_TAGLINE, SITE_TITLE } from "../config/site";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../config/site";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getPublishedArticles } from "../utils/articles";
 
@@ -20,7 +20,6 @@ const latestArticles = articles.slice(0, 6);
       <div class="home-hero__note">
         <span aria-hidden="true">※</span>
         <p>
-          {SITE_TAGLINE}<br />
           哲学を教える場所ではありません。<br />
           答えが出たことになっている話を、いったん戻してみる場所です。
         </p>
