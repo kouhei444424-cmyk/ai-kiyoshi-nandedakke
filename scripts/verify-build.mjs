@@ -14,7 +14,6 @@ const requiredFiles = [
   "articles/index.html",
   `articles/${firstArticleSlug}/index.html`,
   "about/index.html",
-  "rss.xml",
   "robots.txt",
   "sitemap-index.xml",
   "og.png",
@@ -23,6 +22,19 @@ const requiredFiles = [
 
 for (const relativePath of requiredFiles) {
   await access(join(dist, relativePath));
+}
+
+try {
+  await access(join(dist, "rss.xml"));
+  throw new Error("削除したRSSが出力に残っています。");
+} catch (error) {
+  if (
+    !(error instanceof Error) ||
+    !("code" in error) ||
+    error.code !== "ENOENT"
+  ) {
+    throw error;
+  }
 }
 
 for (const slug of removedSlugs) {
@@ -46,19 +58,18 @@ const articleHtml = await readFile(
   join(dist, "articles", firstArticleSlug, "index.html"),
   "utf8",
 );
-const rssXml = await readFile(join(dist, "rss.xml"), "utf8");
 const redirects = await readFile(join(dist, "_redirects"), "utf8");
 
 if (!homeHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
   throw new Error("トップページに一本目の記事がありません。");
 }
 
-if (!archiveHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
-  throw new Error("記事一覧に一本目の記事がありません。");
+if (homeHtml.includes('href="/rss.xml"')) {
+  throw new Error("トップページに削除したRSSリンクが残っています。");
 }
 
-if (!rssXml.includes("<item>") || !rssXml.includes(firstArticleSlug)) {
-  throw new Error("RSSに一本目の記事がありません。");
+if (!archiveHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
+  throw new Error("記事一覧に一本目の記事がありません。");
 }
 
 if (
@@ -98,5 +109,5 @@ for (const slug of removedSlugs) {
 }
 
 console.log(
-  "Build verification passed: 1 anonymous article, adult notice, RSS and sitemap.",
+  "Build verification passed: 1 anonymous article, adult notice and sitemap.",
 );
