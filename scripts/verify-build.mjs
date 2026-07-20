@@ -16,6 +16,7 @@ const requiredFiles = [
   "robots.txt",
   "sitemap-index.xml",
   "og.png",
+  "_redirects",
 ];
 
 for (const relativePath of requiredFiles) {
@@ -40,6 +41,7 @@ for (const slug of removedSlugs) {
 const homeHtml = await readFile(join(dist, "index.html"), "utf8");
 const archiveHtml = await readFile(join(dist, "articles", "index.html"), "utf8");
 const rssXml = await readFile(join(dist, "rss.xml"), "utf8");
+const redirects = await readFile(join(dist, "_redirects"), "utf8");
 
 if (!homeHtml.includes("まだ、問いはありません。")) {
   throw new Error("トップページに0記事時の表示がありません。");
@@ -51,6 +53,12 @@ if (!archiveHtml.includes("まだ、問いはありません。")) {
 
 if (rssXml.includes("<item>")) {
   throw new Error("RSSに削除した仮記事が残っています。");
+}
+
+for (const slug of removedSlugs) {
+  if (!redirects.includes(`/articles/${slug}/ /articles/ 302`)) {
+    throw new Error(`${slug}: 削除済み記事の転送設定がありません。`);
+  }
 }
 
 console.log("Build verification passed: 0 articles, empty states, RSS and sitemap.");
