@@ -11,6 +11,7 @@ interface Props {
   type?: "website" | "article";
   publishedTime?: string;
   updatedTime?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   type = "website",
   publishedTime,
   updatedTime,
+  noindex = false,
 } = Astro.props;
 
 const fullTitle = title === SITE_TITLE ? title : `${title}｜${SITE_TITLE}`;
@@ -40,6 +42,7 @@ const socialImageUrl = new URL("/og.png", siteOrigin);
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalUrl} />
     <link rel="sitemap" href="/sitemap-index.xml" />
 

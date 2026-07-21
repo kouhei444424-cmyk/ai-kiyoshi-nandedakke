@@ -1,5 +1,7 @@
 ---
 import ArticleEnding from "../components/ArticleEnding.astro";
+import CommentSection from "../components/CommentSection.astro";
+import ShareActions from "../components/ShareActions.astro";
 import ViewCounterClient from "../components/ViewCounterClient.astro";
 import { formatJapaneseDate, SITE_TITLE } from "../config/site";
 import BaseLayout from "./BaseLayout.astro";
@@ -12,6 +14,8 @@ interface Props {
   slug: string;
   affiliateUrl?: string;
   affiliateLabel?: string;
+  sharePrompt?: string;
+  shareCtaLabel?: string;
 }
 
 const {
@@ -22,6 +26,8 @@ const {
   slug,
   affiliateUrl,
   affiliateLabel,
+  sharePrompt,
+  shareCtaLabel,
 } = Astro.props;
 const canonicalPath = `/articles/${slug}/`;
 const siteOrigin = Astro.site ?? new URL(Astro.url.origin);
@@ -94,6 +100,15 @@ const structuredData = {
       <div class="article-body">
         <slot />
       </div>
+
+      <ShareActions
+        title={title}
+        canonicalUrl={articleUrl.toString()}
+        sharePrompt={sharePrompt}
+        shareCtaLabel={shareCtaLabel}
+      />
+
+      <CommentSection articlePath={canonicalPath} />
 
       <ArticleEnding affiliateUrl={affiliateUrl} affiliateLabel={affiliateLabel} />
     </article>

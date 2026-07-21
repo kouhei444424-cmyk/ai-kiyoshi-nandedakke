@@ -87,6 +87,14 @@ affiliateLabel: "リンクに表示する商品名"
 
 `draft: true`の記事は、一覧・サイトマップ・本番ビルドから除外されます。
 
+記事末尾のSNS投稿ボタンに使う投稿文は、frontmatterの`sharePrompt`で記事ごとに変更できます（任意）。
+
+```yaml
+sharePrompt: "自分の「危険」は、"
+# 見出し文言を記事ごとに変える場合のみ（通常は不要）
+shareCtaLabel: "自分の考えも、外に置いていく。"
+```
+
 ## 記事末尾のリンク
 
 アフィリエイト審査中など、通常リンクを表示する場合は`ADULT_LINK_URL`にURLを指定します。
@@ -132,6 +140,49 @@ npx wrangler d1 execute ai-kiyoshi-page-views \
 ```
 
 表示用カウンターは読者向けの目安です。正確なアクセス分析にはCloudflare Web Analyticsを使用します。
+
+## コメント機能
+
+記事ごとに、ニックネーム式のコメントを置いていけます。アカウント登録・ログイン不要です。
+
+- ニックネームは任意（未入力は「名無しのオレ」）、最大20文字
+- コメントは必須、最大400文字、プレーンテキストのみ（URL・空白のみは投稿不可）
+- 新しい順に表示、初回20件、それ以降は「もっと見る」で追加読み込み
+- 個人情報・誹謗中傷・宣伝・URLの投稿は禁止（フォーム下に明記）
+- 投稿はCloudflare Turnstileで検証し、同一送信元の連投（1分以内・1時間あたりの上限）を制限
+- 生のIPアドレスはD1へ保存せず、secret saltでハッシュ化した値のみ連投判定に使用
+
+D1には次の追加マイグレーションを適用します（既存の`page_views`テーブルはそのままです）。
+
+```bash
+npx wrangler d1 execute ai-kiyoshi-page-views \
+  --remote \
+  --file=migrations/0002_comments.sql
+```
+
+### Cloudflare Turnstileの設定
+
+1. Cloudflare Dashboard → Turnstile → Add widget（Managedモード、対象ドメインを指定）でSite KeyとSecret Keyを発行します。
+2. Site Key（公開値）は、Cloudflare PagesプロジェクトのEnvironment variables（Production / Preview 両方）に`PUBLIC_TURNSTILE_SITE_KEY`として設定します（Astroのビルド時に埋め込まれます）。
+3. Secret Keyと、連投判定用・管理画面用の値は、Cloudflare Pagesのsecretとして設定します（リポジトリや設定ファイルには書きません）。
+
+```bash
+npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name=ai-kiyoshi-nandedakke
+npx wrangler pages secret put COMMENT_HASH_SALT --project-name=ai-kiyoshi-nandedakke
+npx wrangler pages secret put COMMENT_ADMIN_TOKEN --project-name=ai-kiyoshi-nandedakke
+```
+
+`COMMENT_HASH_SALT`・`COMMENT_ADMIN_TOKEN`は、十分に長いランダム値を使用してください（例: `openssl rand -hex 32`）。
+
+ローカルで`wrangler pages dev`を使ってFunctionsを試す場合は、`.dev.vars`（gitignore済み）に同じキー名で値を設定します。Cloudflare公式のTurnstileテスト用キー（常に成功: サイトキー`1x00000000000000000000AA` / シークレット`1x0000000000000000000000000000000AA`）を使うと、実際の審査なしに動作確認できます。
+
+### コメント管理画面
+
+`/admin/comments/`（通常のナビゲーションからはリンクしていません、`noindex`）で、コメントの一覧・記事別/状態別の絞り込み・非表示化・再表示・完全削除ができます。管理者トークン（`COMMENT_ADMIN_TOKEN`と同じ値）の入力が必要です。トークンはURLに含めず、タブを閉じると破棄されます（sessionStorageのみ使用）。
+
+## SNSシェア機能
+
+記事末尾にThreads・Xへの投稿ボタンと、リンクコピーボタンを表示します。API連携や自動投稿は行わず、公式のWeb Intent（投稿画面を開くだけ）とクリップボードコピーのみです。投稿の最終確定は読者自身が行います。
 
 ## Cloudflare Pagesへ公開する
 

@@ -4,7 +4,8 @@
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-07-20",
   "vars": {
-    "SITE_URL": "https://ai-kiyoshi-nandedakke.pages.dev"
+    "SITE_URL": "https://ai-kiyoshi-nandedakke.pages.dev",
+    "PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAD6mL-nDDsRpABjn"
   },
   "d1_databases": [
     {

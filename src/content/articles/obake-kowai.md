@@ -7,6 +7,7 @@ draft: false
 featured: false
 affiliateUrl: "https://al.fanza.co.jp/?lurl=https%3A%2F%2Fvideo.dmm.co.jp%2Fav%2Fcontent%2F%3Fid%3Dsqde00028&af_id=kiyoshi0505-001&ch=search_link&ch_id=text"
 affiliateLabel: "セフレ以上、恋人未満。服を脱いだら性欲お化け ギャップがエグイ巨乳娘。九井スナオ"
+sharePrompt: "自分が怖いものは、"
 ---
 
 おばけを見たことがない。

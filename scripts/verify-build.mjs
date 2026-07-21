@@ -28,6 +28,11 @@ const requiredFiles = [
 const requiredSourceFiles = [
   "functions/api/views.js",
   "migrations/0001_page_views.sql",
+  "functions/api/comments.js",
+  "functions/api/admin/comments.js",
+  "functions/api/admin/comments/[id].js",
+  "functions/_lib/comments.js",
+  "migrations/0002_comments.sql",
 ];
 
 for (const relativePath of requiredFiles) {
@@ -285,6 +290,44 @@ for (const slug of removedSlugs) {
   if (!redirects.includes(`/articles/${slug}/ /articles/ 302`)) {
     throw new Error(`${slug}: 削除済み記事の転送設定がありません。`);
   }
+}
+
+for (const [index, html] of [
+  articleHtml,
+  speedingArticleHtml,
+  thirdArticleHtml,
+  fourthArticleHtml,
+].entries()) {
+  if (
+    !html.includes("Threadsで書く") ||
+    !html.includes("Xで書く") ||
+    !html.includes("リンクをコピー") ||
+    !html.includes("ほかの人は、どう思った？") ||
+    !html.includes("今日のところの考えを、置いていけます。") ||
+    !html.includes("置いていく")
+  ) {
+    throw new Error(`${index + 1}本目の記事にSNSシェアまたはコメント欄の表示がありません。`);
+  }
+
+  const shareIndex = html.indexOf("Threadsで書く");
+  const commentIndex = html.indexOf("ほかの人は、どう思った？");
+  const endingIndex = html.indexOf("考えるのが疲れたら行ってらっしゃい。");
+  const navIndex = html.indexOf("ほかの「なんでだっけ。」を見る");
+
+  if (
+    !(shareIndex > 0 && commentIndex > shareIndex && endingIndex > commentIndex && navIndex > endingIndex)
+  ) {
+    throw new Error(
+      `${index + 1}本目の記事末尾の表示順（本文→SNS→コメント→締め→ナビ）が崩れています。`,
+    );
+  }
+}
+
+if (
+  !articleHtml.includes("twitter.com/intent/tweet") ||
+  !articleHtml.includes("threads.com/intent/post")
+) {
+  throw new Error("一本目の記事にSNS投稿用リンクがありません。");
 }
 
 console.log(

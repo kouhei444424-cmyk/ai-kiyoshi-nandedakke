@@ -5,6 +5,7 @@ publishedAt: 2026-07-21
 updatedAt: 2026-07-21
 draft: false
 featured: false
+sharePrompt: "自分の「危険」は、"
 ---
 
 人を殴る。

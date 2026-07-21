@@ -16,6 +16,8 @@ const articles = defineCollection({
     featured: z.boolean().default(false),
     affiliateUrl: z.url().optional(),
     affiliateLabel: z.string().min(1).optional(),
+    sharePrompt: z.string().min(1).optional(),
+    shareCtaLabel: z.string().min(1).optional(),
   }),
 });
 

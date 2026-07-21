@@ -25,6 +25,8 @@ const { Content } = await render(article);
   slug={article.id}
   affiliateUrl={article.data.affiliateUrl}
   affiliateLabel={article.data.affiliateLabel}
+  sharePrompt={article.data.sharePrompt}
+  shareCtaLabel={article.data.shareCtaLabel}
 >
   <Content />
 </ArticleLayout>

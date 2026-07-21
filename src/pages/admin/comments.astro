@@ -1,0 +1,318 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPublishedArticles } from "../../utils/articles";
+
+const articles = await getPublishedArticles();
+const articleOptions = articles.map((article) => ({
+  path: `/articles/${article.id}/`,
+  title: article.data.title,
+}));
+---
+
+<BaseLayout title="コメント管理" noindex={true}>
+  <div class="admin-comments">
+    <header class="admin-comments__header">
+      <p class="admin-comments__eyebrow">ADMIN</p>
+      <h1>コメント管理</h1>
+      <p class="admin-comments__note">
+        このページは検索エンジンに公開されません。管理者トークンが必要です。トークンはこのタブを閉じると破棄されます。
+      </p>
+    </header>
+
+    <section class="admin-comments__auth" data-admin-auth>
+      <label class="admin-comments__label" for="admin-token">管理者トークン</label>
+      <div class="admin-comments__token-row">
+        <input
+          id="admin-token"
+          type="password"
+          class="admin-comments__input"
+          autocomplete="off"
+          data-admin-token-input
+        />
+        <button type="button" class="admin-comments__btn" data-admin-token-submit>認証する</button>
+      </div>
+      <p class="admin-comments__status" role="status" aria-live="polite" data-admin-auth-status></p>
+    </section>
+
+    <section class="admin-comments__panel" data-admin-panel hidden>
+      <div class="admin-comments__filters">
+        <div class="admin-comments__filter">
+          <label for="admin-filter-path">記事</label>
+          <select id="admin-filter-path" data-admin-filter-path>
+            <option value="">すべての記事</option>
+            {articleOptions.map((option) => <option value={option.path}>{option.title}</option>)}
+          </select>
+        </div>
+        <div class="admin-comments__filter">
+          <label for="admin-filter-status">状態</label>
+          <select id="admin-filter-status" data-admin-filter-status>
+            <option value="">すべて</option>
+            <option value="visible">公開中</option>
+            <option value="hidden">非表示</option>
+          </select>
+        </div>
+        <button type="button" class="admin-comments__btn" data-admin-refresh>更新</button>
+        <button type="button" class="admin-comments__btn admin-comments__btn--ghost" data-admin-logout>
+          ログアウト
+        </button>
+      </div>
+
+      <p class="admin-comments__count" data-admin-count></p>
+      <p class="admin-comments__status" role="status" aria-live="polite" data-admin-list-status></p>
+
+      <ul class="admin-comments__list" data-admin-list></ul>
+      <button type="button" class="admin-comments__btn" data-admin-more hidden>もっと見る</button>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  interface AdminComment {
+    id: string;
+    articlePath: string;
+    nickname: string;
+    body: string;
+    status: "visible" | "hidden";
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  const TOKEN_KEY = "aikiyoshi-comment-admin-token";
+  const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  function formatDate(iso: string) {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? iso : dateFormatter.format(date);
+  }
+
+  const authSection = document.querySelector<HTMLElement>("[data-admin-auth]");
+  const panelSection = document.querySelector<HTMLElement>("[data-admin-panel]");
+  const tokenInput = document.querySelector<HTMLInputElement>("[data-admin-token-input]");
+  const tokenSubmit = document.querySelector<HTMLButtonElement>("[data-admin-token-submit]");
+  const authStatus = document.querySelector<HTMLElement>("[data-admin-auth-status]");
+  const filterPath = document.querySelector<HTMLSelectElement>("[data-admin-filter-path]");
+  const filterStatus = document.querySelector<HTMLSelectElement>("[data-admin-filter-status]");
+  const refreshBtn = document.querySelector<HTMLButtonElement>("[data-admin-refresh]");
+  const logoutBtn = document.querySelector<HTMLButtonElement>("[data-admin-logout]");
+  const countEl = document.querySelector<HTMLElement>("[data-admin-count]");
+  const listStatusEl = document.querySelector<HTMLElement>("[data-admin-list-status]");
+  const listEl = document.querySelector<HTMLUListElement>("[data-admin-list]");
+  const moreBtn = document.querySelector<HTMLButtonElement>("[data-admin-more]");
+
+  let offset = 0;
+
+  function getToken(): string {
+    return sessionStorage.getItem(TOKEN_KEY) ?? "";
+  }
+
+  function showPanel() {
+    if (authSection) authSection.hidden = true;
+    if (panelSection) panelSection.hidden = false;
+  }
+
+  function showAuth(message = "") {
+    if (authSection) authSection.hidden = false;
+    if (panelSection) panelSection.hidden = true;
+    if (authStatus) authStatus.textContent = message;
+  }
+
+  async function adminFetch(path: string, options: RequestInit = {}) {
+    const token = getToken();
+    return fetch(path, {
+      ...options,
+      headers: {
+        ...(options.headers as Record<string, string> | undefined),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  function renderItem(comment: AdminComment) {
+    const li = document.createElement("li");
+    li.className = "admin-comments__item";
+    li.dataset.status = comment.status;
+    li.dataset.commentId = comment.id;
+
+    const meta = document.createElement("div");
+    meta.className = "admin-comments__item-meta";
+    meta.innerHTML = "";
+
+    const badge = document.createElement("span");
+    badge.className = `admin-comments__badge admin-comments__badge--${comment.status}`;
+    badge.textContent = comment.status === "visible" ? "公開中" : "非表示";
+
+    const path = document.createElement("span");
+    path.className = "admin-comments__item-path";
+    path.textContent = comment.articlePath;
+
+    const time = document.createElement("time");
+    time.className = "admin-comments__item-time";
+    time.dateTime = comment.createdAt;
+    time.textContent = formatDate(comment.createdAt);
+
+    meta.append(badge, path, time);
+
+    const nickname = document.createElement("p");
+    nickname.className = "admin-comments__item-nickname";
+    nickname.textContent = comment.nickname;
+
+    const body = document.createElement("p");
+    body.className = "admin-comments__item-body";
+    body.textContent = comment.body;
+
+    const actions = document.createElement("div");
+    actions.className = "admin-comments__item-actions";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "admin-comments__btn";
+    toggleBtn.textContent = comment.status === "visible" ? "非表示にする" : "再表示する";
+    toggleBtn.addEventListener("click", () => void toggleStatus(comment, toggleBtn));
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "admin-comments__btn admin-comments__btn--danger";
+    deleteBtn.textContent = "完全削除";
+    deleteBtn.addEventListener("click", () => void deleteComment(comment, li));
+
+    actions.append(toggleBtn, deleteBtn);
+    li.append(meta, nickname, body, actions);
+    return li;
+  }
+
+  async function toggleStatus(comment: AdminComment, button: HTMLButtonElement) {
+    button.disabled = true;
+    const action = comment.status === "visible" ? "hide" : "show";
+
+    try {
+      const response = await adminFetch(`/api/admin/comments/${comment.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+
+      if (response.status === 401) {
+        showAuth("トークンが正しくありません。もう一度入力してください。");
+        sessionStorage.removeItem(TOKEN_KEY);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("update-failed");
+      }
+
+      await loadComments(0, false);
+    } catch {
+      if (listStatusEl) listStatusEl.textContent = "更新に失敗しました。もう一度お試しください。";
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function deleteComment(comment: AdminComment, li: HTMLLIElement) {
+    const confirmed = window.confirm("このコメントを完全に削除します。元に戻せません。よろしいですか？");
+    if (!confirmed) return;
+
+    try {
+      const response = await adminFetch(`/api/admin/comments/${comment.id}`, { method: "DELETE" });
+
+      if (response.status === 401) {
+        showAuth("トークンが正しくありません。もう一度入力してください。");
+        sessionStorage.removeItem(TOKEN_KEY);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("delete-failed");
+      }
+
+      li.remove();
+    } catch {
+      if (listStatusEl) listStatusEl.textContent = "削除に失敗しました。もう一度お試しください。";
+    }
+  }
+
+  async function loadComments(nextOffset: number, append: boolean) {
+    if (listStatusEl) listStatusEl.textContent = "読み込み中です。";
+
+    const params = new URLSearchParams({ offset: String(nextOffset) });
+    if (filterPath?.value) params.set("path", filterPath.value);
+    if (filterStatus?.value) params.set("status", filterStatus.value);
+
+    try {
+      const response = await adminFetch(`/api/admin/comments?${params.toString()}`);
+
+      if (response.status === 401) {
+        showAuth("トークンが正しくありません。もう一度入力してください。");
+        sessionStorage.removeItem(TOKEN_KEY);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("load-failed");
+      }
+
+      const data = await response.json();
+      const comments: AdminComment[] = Array.isArray(data.comments) ? data.comments : [];
+
+      if (!append && listEl) listEl.innerHTML = "";
+      comments.forEach((comment) => listEl?.appendChild(renderItem(comment)));
+
+      offset = nextOffset + comments.length;
+      if (countEl) countEl.textContent = `全${data.total ?? 0}件`;
+      if (moreBtn) moreBtn.hidden = !data.hasMore;
+      if (listStatusEl) listStatusEl.textContent = `${comments.length}件を表示しました。`;
+    } catch {
+      if (listStatusEl) listStatusEl.textContent = "読み込みに失敗しました。もう一度お試しください。";
+    }
+  }
+
+  tokenSubmit?.addEventListener("click", async () => {
+    const value = tokenInput?.value.trim() ?? "";
+    if (!value) {
+      if (authStatus) authStatus.textContent = "トークンを入力してください。";
+      return;
+    }
+
+    sessionStorage.setItem(TOKEN_KEY, value);
+    if (authStatus) authStatus.textContent = "確認しています…";
+
+    const response = await adminFetch("/api/admin/comments?limit=1");
+
+    if (response.status === 401) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      if (authStatus) authStatus.textContent = "トークンが正しくありません。";
+      return;
+    }
+
+    if (!response.ok) {
+      if (authStatus) authStatus.textContent = "確認に失敗しました。もう一度お試しください。";
+      return;
+    }
+
+    if (tokenInput) tokenInput.value = "";
+    showPanel();
+    void loadComments(0, false);
+  });
+
+  refreshBtn?.addEventListener("click", () => void loadComments(0, false));
+  filterPath?.addEventListener("change", () => void loadComments(0, false));
+  filterStatus?.addEventListener("change", () => void loadComments(0, false));
+  moreBtn?.addEventListener("click", () => void loadComments(offset, true));
+
+  logoutBtn?.addEventListener("click", () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    showAuth();
+  });
+
+  if (getToken()) {
+    showPanel();
+    void loadComments(0, false);
+  }
+</script>

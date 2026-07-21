@@ -1,0 +1,198 @@
+---
+interface Props {
+  title: string;
+  canonicalUrl: string;
+  sharePrompt?: string;
+  shareCtaLabel?: string;
+}
+
+const { title, canonicalUrl, sharePrompt, shareCtaLabel } = Astro.props;
+
+const HEADING_TEXT = shareCtaLabel?.trim() || "自分の考えも、外に置いていく。";
+const SUB_TEXT = "答えじゃなくて、今日のところで。";
+const HASHTAG = "#考えちゃいけないこと考える";
+const X_MAX_WEIGHTED_LENGTH = 280;
+const X_URL_WEIGHT = 23;
+
+// Approximates X's weighted-length rule: most CJK / fullwidth code points count as 2.
+function charWeight(char: string): number {
+  const code = char.codePointAt(0) ?? 0;
+  const isWide =
+    (code >= 0x1100 && code <= 0x115f) ||
+    (code >= 0x2e80 && code <= 0xa4cf) ||
+    (code >= 0xac00 && code <= 0xd7a3) ||
+    (code >= 0xf900 && code <= 0xfaff) ||
+    (code >= 0xff00 && code <= 0xff60) ||
+    (code >= 0xffe0 && code <= 0xffe6) ||
+    (code >= 0x20000 && code <= 0x3fffd);
+  return isWide ? 2 : 1;
+}
+
+function weightedLength(text: string): number {
+  return Array.from(text).reduce((total, char) => total + charWeight(char), 0);
+}
+
+const promptLine = sharePrompt?.trim() ?? "";
+
+function buildShareText(titleText: string): string {
+  const lines: string[] = [];
+  if (promptLine) {
+    lines.push(promptLine, "");
+  }
+  lines.push(`「${titleText}」`, canonicalUrl, HASHTAG);
+  return lines.join("\n");
+}
+
+function fitTitleForX(titleText: string): string {
+  const withoutUrl = buildShareText(titleText).replace(canonicalUrl, "");
+  const staticWeight = weightedLength(withoutUrl) + X_URL_WEIGHT;
+
+  if (staticWeight <= X_MAX_WEIGHTED_LENGTH) {
+    return titleText;
+  }
+
+  const overflow = staticWeight - X_MAX_WEIGHTED_LENGTH;
+  const budget = Math.max(0, weightedLength(titleText) - overflow - 1);
+
+  let truncated = "";
+  let used = 0;
+  for (const char of titleText) {
+    const weight = charWeight(char);
+    if (used + weight > budget) {
+      break;
+    }
+    truncated += char;
+    used += weight;
+  }
+
+  return `${truncated}…`;
+}
+
+const shareText = buildShareText(fitTitleForX(title));
+const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+const threadsUrl = `https://www.threads.com/intent/post?text=${encodeURIComponent(shareText)}`;
+---
+
+<section class="share-actions" aria-labelledby="share-actions-heading">
+  <p class="share-actions__eyebrow">SHARE</p>
+  <h2 id="share-actions-heading" class="share-actions__heading">{HEADING_TEXT}</h2>
+  <p class="share-actions__sub">{SUB_TEXT}</p>
+
+  <div class="share-actions__buttons">
+    <a
+      class="share-actions__btn share-actions__btn--threads"
+      href={threadsUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-share-threads
+      data-share-text={shareText}
+      data-share-url={canonicalUrl}
+    >
+      Threadsで書く
+    </a>
+    <a
+      class="share-actions__btn share-actions__btn--x"
+      href={xUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Xで書く
+    </a>
+    <button
+      type="button"
+      class="share-actions__btn share-actions__btn--copy"
+      data-copy-url={canonicalUrl}
+    >
+      リンクをコピー
+    </button>
+  </div>
+
+  <p class="share-actions__status" role="status" aria-live="polite" data-share-status></p>
+</section>
+
+<script>
+  function announceIn(section: HTMLElement, message: string) {
+    const statusEl = section.querySelector<HTMLElement>("[data-share-status]");
+    if (statusEl) {
+      statusEl.textContent = message;
+    }
+  }
+
+  function revealFallbackInput(section: HTMLElement, url: string) {
+    let fallback = section.querySelector<HTMLInputElement>("[data-share-fallback]");
+
+    if (!fallback) {
+      fallback = document.createElement("input");
+      fallback.type = "text";
+      fallback.readOnly = true;
+      fallback.className = "share-actions__fallback-input";
+      fallback.setAttribute("data-share-fallback", "true");
+      fallback.setAttribute("aria-label", "記事のURL");
+      section.appendChild(fallback);
+    }
+
+    fallback.hidden = false;
+    fallback.value = url;
+    fallback.focus();
+    fallback.select();
+  }
+
+  async function copyToClipboard(section: HTMLElement, url: string) {
+    try {
+      if (!navigator.clipboard || !window.isSecureContext) {
+        throw new Error("clipboard-unavailable");
+      }
+      await navigator.clipboard.writeText(url);
+      announceIn(section, "記事のリンクをコピーしました。");
+    } catch {
+      revealFallbackInput(section, url);
+      announceIn(section, "コピーできませんでした。表示されたURLを選択してコピーしてください。");
+    }
+  }
+
+  function initShareActions() {
+    document.querySelectorAll<HTMLElement>(".share-actions").forEach((section) => {
+      const copyBtn = section.querySelector<HTMLButtonElement>("[data-copy-url]");
+      const threadsLink = section.querySelector<HTMLAnchorElement>("[data-share-threads]");
+
+      copyBtn?.addEventListener("click", () => {
+        const url = copyBtn.dataset.copyUrl;
+        if (url) {
+          void copyToClipboard(section, url);
+        }
+      });
+
+      threadsLink?.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const href = threadsLink.href;
+        const shareUrl = threadsLink.dataset.shareUrl ?? href;
+        const shareTextValue = threadsLink.dataset.shareText ?? "";
+
+        let popup: Window | null = null;
+        try {
+          popup = window.open(href, "_blank", "noopener,noreferrer");
+        } catch {
+          popup = null;
+        }
+
+        if (popup) {
+          return;
+        }
+
+        if (navigator.share) {
+          navigator
+            .share({ title: document.title, text: shareTextValue, url: shareUrl })
+            .catch(() => {
+              void copyToClipboard(section, shareUrl);
+            });
+          return;
+        }
+
+        void copyToClipboard(section, shareUrl);
+      });
+    });
+  }
+
+  initShareActions();
+</script>

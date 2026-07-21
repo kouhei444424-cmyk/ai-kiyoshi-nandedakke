@@ -1,0 +1,374 @@
+---
+interface Props {
+  articlePath: string;
+}
+
+const { articlePath } = Astro.props;
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+<section
+  class="comment-section"
+  aria-labelledby="comment-section-heading"
+  data-comment-section
+  data-article-path={articlePath}
+>
+  <p class="comment-section__eyebrow">COMMENT</p>
+  <h2 id="comment-section-heading" class="comment-section__heading">ほかの人は、どう思った？</h2>
+  <p class="comment-section__sub">今日のところの考えを、置いていけます。</p>
+
+  <p class="visually-hidden" role="status" aria-live="polite" data-comment-list-status></p>
+
+  <div class="comment-list" data-comment-list data-state="loading">
+    <p class="comment-list__meta">
+      <strong data-comment-count>—</strong><span>件の考え</span>
+    </p>
+    <ul class="comment-list__items" data-comment-items></ul>
+    <p class="comment-list__empty" data-comment-empty hidden>
+      まだ何も置かれていません。最初のひとことをどうぞ。
+    </p>
+    <div class="comment-list__error" data-comment-error hidden>
+      <p>読み込みに失敗しました。</p>
+      <button type="button" class="comment-list__retry" data-comment-retry>もう一度読み込む</button>
+    </div>
+    <button type="button" class="comment-list__more" data-comment-more hidden>もっと見る</button>
+  </div>
+
+  <form class="comment-form" data-comment-form novalidate>
+    <div class="comment-form__row">
+      <label class="comment-form__label" for="comment-nickname">ニックネーム（任意・20文字まで）</label>
+      <input
+        id="comment-nickname"
+        name="nickname"
+        type="text"
+        class="comment-form__input"
+        maxlength="20"
+        autocomplete="off"
+        placeholder="名無しのオレ"
+        data-comment-nickname
+      />
+    </div>
+
+    <div class="comment-form__row">
+      <label class="comment-form__label" for="comment-body">今日のところの考え</label>
+      <textarea
+        id="comment-body"
+        name="body"
+        class="comment-form__textarea"
+        maxlength="400"
+        rows="4"
+        required
+        aria-describedby="comment-body-counter comment-body-error"
+        data-comment-body></textarea>
+      <div class="comment-form__meta-row">
+        <span class="comment-form__counter" id="comment-body-counter" data-comment-counter>0 / 400</span>
+      </div>
+      <p class="comment-form__field-error" id="comment-body-error" data-comment-body-error role="alert" hidden></p>
+    </div>
+
+    <div class="comment-form__honeypot" aria-hidden="true">
+      <label for="comment-website">website</label>
+      <input
+        id="comment-website"
+        name="website"
+        type="text"
+        tabindex="-1"
+        autocomplete="off"
+        data-comment-honeypot
+      />
+    </div>
+
+    {
+      siteKey && (
+        <div
+          class="cf-turnstile comment-form__turnstile"
+          data-sitekey={siteKey}
+          data-expired-callback="handleCommentTurnstileExpired"
+          data-comment-turnstile
+        />
+      )
+    }
+
+    <p class="comment-form__notice">
+      投稿内容とニックネームは公開されます。個人情報・誹謗中傷・宣伝・URLの投稿は禁止です。管理者判断で非表示にすることがあります。
+    </p>
+
+    <p class="comment-form__status" role="status" aria-live="polite" data-comment-status></p>
+
+    <button type="submit" class="comment-form__submit" data-comment-submit>置いていく</button>
+  </form>
+</section>
+
+{siteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
+
+<script>
+  interface CommentPayload {
+    id: string;
+    nickname: string;
+    body: string;
+    createdAt: string;
+  }
+
+  const numberFormatter = new Intl.NumberFormat("ja-JP");
+  const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  function formatDate(iso: string) {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? "" : dateFormatter.format(date);
+  }
+
+  function createCommentItem(comment: CommentPayload) {
+    const li = document.createElement("li");
+    li.className = "comment-item";
+    li.dataset.commentId = comment.id;
+
+    const meta = document.createElement("div");
+    meta.className = "comment-item__meta";
+
+    const nickname = document.createElement("span");
+    nickname.className = "comment-item__nickname";
+    nickname.textContent = comment.nickname;
+
+    const time = document.createElement("time");
+    time.className = "comment-item__time";
+    time.dateTime = comment.createdAt;
+    time.textContent = formatDate(comment.createdAt);
+
+    meta.append(nickname, time);
+
+    const body = document.createElement("p");
+    body.className = "comment-item__body";
+    body.textContent = comment.body;
+
+    li.append(meta, body);
+    return li;
+  }
+
+  (window as any).handleCommentTurnstileExpired = function handleCommentTurnstileExpired() {
+    document.querySelectorAll<HTMLElement>("[data-comment-status]").forEach((el) => {
+      el.textContent = "確認の有効期限が切れました。もう一度お試しください。";
+    });
+  };
+
+  function initCommentSection(section: HTMLElement) {
+    const articlePath = section.dataset.articlePath;
+    if (!articlePath) return;
+
+    const listContainer = section.querySelector<HTMLElement>("[data-comment-list]");
+    const listStatusEl = section.querySelector<HTMLElement>("[data-comment-list-status]");
+    const itemsEl = section.querySelector<HTMLUListElement>("[data-comment-items]");
+    const countEl = section.querySelector<HTMLElement>("[data-comment-count]");
+    const emptyEl = section.querySelector<HTMLElement>("[data-comment-empty]");
+    const errorEl = section.querySelector<HTMLElement>("[data-comment-error]");
+    const retryBtn = section.querySelector<HTMLButtonElement>("[data-comment-retry]");
+    const moreBtn = section.querySelector<HTMLButtonElement>("[data-comment-more]");
+    const form = section.querySelector<HTMLFormElement>("[data-comment-form]");
+    const nicknameInput = section.querySelector<HTMLInputElement>("[data-comment-nickname]");
+    const bodyInput = section.querySelector<HTMLTextAreaElement>("[data-comment-body]");
+    const counterEl = section.querySelector<HTMLElement>("[data-comment-counter]");
+    const bodyErrorEl = section.querySelector<HTMLElement>("[data-comment-body-error]");
+    const honeypotInput = section.querySelector<HTMLInputElement>("[data-comment-honeypot]");
+    const statusEl = section.querySelector<HTMLElement>("[data-comment-status]");
+    const submitBtn = section.querySelector<HTMLButtonElement>("[data-comment-submit]");
+
+    if (!itemsEl || !form || !bodyInput || !submitBtn) return;
+
+    let offset = 0;
+    let total = 0;
+    const loadedIds = new Set<string>();
+
+    function setListState(mode: "loading" | "ready" | "error") {
+      if (listContainer) listContainer.dataset.state = mode;
+    }
+
+    function announceList(message: string) {
+      if (listStatusEl) listStatusEl.textContent = message;
+    }
+
+    function updateCount(value: number) {
+      total = value;
+      if (countEl) countEl.textContent = numberFormatter.format(value);
+    }
+
+    function updateCounter() {
+      const length = Array.from(bodyInput!.value).length;
+      if (counterEl) counterEl.textContent = `${numberFormatter.format(length)} / 400`;
+    }
+
+    async function loadComments(nextOffset: number, append: boolean) {
+      setListState("loading");
+      if (errorEl) errorEl.hidden = true;
+      if (!append) announceList("読み込み中です。");
+
+      try {
+        const params = new URLSearchParams({ path: articlePath!, offset: String(nextOffset) });
+        const response = await fetch(`/api/comments?${params.toString()}`, {
+          headers: { Accept: "application/json" },
+        });
+
+        if (!response.ok) {
+          throw new Error(`unexpected status ${response.status}`);
+        }
+
+        const data = await response.json();
+        const comments: CommentPayload[] = Array.isArray(data.comments) ? data.comments : [];
+
+        if (!append) {
+          itemsEl!.innerHTML = "";
+          loadedIds.clear();
+        }
+
+        for (const comment of comments) {
+          if (loadedIds.has(comment.id)) continue;
+          loadedIds.add(comment.id);
+          itemsEl!.appendChild(createCommentItem(comment));
+        }
+
+        offset = nextOffset + comments.length;
+        updateCount(Number(data.total ?? 0));
+
+        if (emptyEl) emptyEl.hidden = total > 0;
+        if (moreBtn) moreBtn.hidden = !data.hasMore;
+
+        setListState("ready");
+        announceList(total > 0 ? `${numberFormatter.format(total)}件のコメントを表示しています。` : "まだコメントはありません。");
+      } catch (error) {
+        console.error("Failed to load comments.", error);
+        setListState("error");
+        if (errorEl) errorEl.hidden = false;
+        announceList("コメントの読み込みに失敗しました。");
+      }
+    }
+
+    retryBtn?.addEventListener("click", () => {
+      void loadComments(0, false);
+    });
+
+    moreBtn?.addEventListener("click", () => {
+      moreBtn.disabled = true;
+      void loadComments(offset, true).finally(() => {
+        moreBtn.disabled = false;
+      });
+    });
+
+    bodyInput.addEventListener("input", updateCounter);
+    updateCounter();
+
+    function getTurnstileToken(): string {
+      const widget = form!.querySelector<HTMLElement>("[data-comment-turnstile]");
+      const input = widget?.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]');
+      return input?.value ?? "";
+    }
+
+    function resetTurnstile() {
+      const widget = form!.querySelector<HTMLElement>("[data-comment-turnstile]");
+      const globalTurnstile = (window as any).turnstile;
+      if (widget && globalTurnstile?.reset) {
+        globalTurnstile.reset(widget);
+      }
+    }
+
+    function setFieldError(message: string) {
+      if (bodyErrorEl) {
+        bodyErrorEl.textContent = message;
+        bodyErrorEl.hidden = message.length === 0;
+      }
+      bodyInput!.setAttribute("aria-invalid", message ? "true" : "false");
+    }
+
+    function setStatus(message: string) {
+      if (statusEl) statusEl.textContent = message;
+    }
+
+    form!.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (submitBtn.disabled) return;
+
+      const bodyValue = bodyInput.value.trim();
+      setFieldError("");
+      setStatus("");
+
+      if (bodyValue.length === 0) {
+        setFieldError("コメントを入力してください。");
+        bodyInput.focus();
+        return;
+      }
+
+      if (Array.from(bodyValue).length > 400) {
+        setFieldError("コメントは400文字までです。");
+        bodyInput.focus();
+        return;
+      }
+
+      const hasTurnstileWidget = Boolean(form!.querySelector("[data-comment-turnstile]"));
+      const turnstileToken = getTurnstileToken();
+
+      if (hasTurnstileWidget && !turnstileToken) {
+        setStatus("認証を確認しています。少し待ってからもう一度お試しください。");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.setAttribute("aria-busy", "true");
+      setStatus("送信しています…");
+
+      fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: articlePath,
+          nickname: nicknameInput?.value ?? "",
+          body: bodyValue,
+          website: honeypotInput?.value ?? "",
+          turnstileToken,
+        }),
+      })
+        .then(async (response) => {
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            const message =
+              typeof data.error === "string" ? data.error : "送信できませんでした。もう一度お試しください。";
+            if (data.field === "body" || data.field === "nickname") {
+              setFieldError(message);
+            } else {
+              setStatus(message);
+            }
+            resetTurnstile();
+            return;
+          }
+
+          if (data.comment && !loadedIds.has(data.comment.id)) {
+            loadedIds.add(data.comment.id);
+            itemsEl!.insertBefore(createCommentItem(data.comment), itemsEl!.firstChild);
+            updateCount(total + 1);
+            if (emptyEl) emptyEl.hidden = true;
+          }
+
+          form!.reset();
+          updateCounter();
+          resetTurnstile();
+          setStatus("置いていきました。");
+        })
+        .catch(() => {
+          setStatus("通信エラーが発生しました。もう一度お試しください。");
+          resetTurnstile();
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute("aria-busy");
+        });
+    });
+
+    void loadComments(0, false);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-comment-section]").forEach((section) => initCommentSection(section));
+</script>
