@@ -1,8 +1,15 @@
 ---
-const rawAffiliateUrl = import.meta.env.AFFILIATE_URL?.trim();
+interface Props {
+  affiliateUrl?: string;
+  affiliateLabel?: string;
+}
+
+const { affiliateUrl, affiliateLabel } = Astro.props;
+const rawAffiliateUrl = affiliateUrl?.trim() || import.meta.env.AFFILIATE_URL?.trim();
 const rawAdultLinkUrl = import.meta.env.ADULT_LINK_URL?.trim();
 const rawDestinationUrl = rawAffiliateUrl || rawAdultLinkUrl;
 const isAffiliate = Boolean(rawAffiliateUrl);
+const linkLabel = affiliateLabel?.trim() || "とうか";
 let destinationUrl: string | undefined;
 
 if (rawDestinationUrl) {
@@ -33,7 +40,7 @@ if (rawDestinationUrl) {
             data-affiliate-link={isAffiliate ? "true" : undefined}
             aria-describedby="adult-link-notice"
           >
-            とうか
+            {linkLabel}
             <span aria-hidden="true">↗</span>
           </a>
         </div>

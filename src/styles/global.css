@@ -816,10 +816,14 @@ a:focus-visible {
 }
 
 .article-ending__affiliate a {
+  min-width: 0;
+  flex: 1 1 16rem;
   color: var(--paper-ink);
   font-family: var(--mono);
   font-size: 0.85rem;
   font-weight: 700;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
   text-decoration-color: var(--paper-muted);
 }
 

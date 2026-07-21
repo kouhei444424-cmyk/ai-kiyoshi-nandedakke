@@ -203,7 +203,6 @@ if (
 
 for (const [index, html] of [articleHtml, speedingArticleHtml, thirdArticleHtml].entries()) {
   if (
-    !html.includes("とうか") ||
     !html.includes("広告・18禁") ||
     !html.includes("考えるのが疲れたら行ってらっしゃい。") ||
     !html.includes("18歳未満の方は閲覧できません。") ||
@@ -213,6 +212,21 @@ for (const [index, html] of [articleHtml, speedingArticleHtml, thirdArticleHtml]
     !html.includes('data-affiliate-link="true"')
   ) {
     throw new Error(`${index + 1}本目の記事末尾に広告リンクまたは18禁表記がありません。`);
+  }
+}
+
+if (
+  !articleHtml.includes("mkmp00733") ||
+  !articleHtml.includes("ch=search_link") ||
+  !articleHtml.includes("-実写版- 乙葉ちゃんとSEX") ||
+  articleHtml.includes("id%3Doshi017")
+) {
+  throw new Error("一本目の記事に専用アフィリエイトリンクがありません。");
+}
+
+for (const [index, html] of [speedingArticleHtml, thirdArticleHtml].entries()) {
+  if (!html.includes("とうか") || !html.includes("id%3Doshi017")) {
+    throw new Error(`${index + 2}本目の記事の共通アフィリエイトリンクが変わっています。`);
   }
 }
 

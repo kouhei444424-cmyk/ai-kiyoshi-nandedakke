@@ -68,6 +68,9 @@ publishedAt: 2026-07-20
 updatedAt: 2026-07-21 # 任意
 draft: false
 featured: false
+# 記事ごとにリンクを変える場合のみ指定
+affiliateUrl: "https://example.com/affiliate-link"
+affiliateLabel: "リンクに表示する商品名"
 ---
 ```
 
@@ -99,6 +102,8 @@ AFFILIATE_URL=https://example.com/
 ```
 
 - `AFFILIATE_URL`を設定：広告リンクとして表示
+- 記事frontmatterの`affiliateUrl`を設定：その記事だけ環境変数より優先
+- `affiliateLabel`を設定：その記事だけリンク名を変更
 - `ADULT_LINK_URL`のみ設定：通常リンクとして表示
 - 両方を設定：`AFFILIATE_URL`を優先
 - 両方とも未設定または空欄：リンクを表示しない

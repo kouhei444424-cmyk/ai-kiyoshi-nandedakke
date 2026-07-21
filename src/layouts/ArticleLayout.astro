@@ -10,9 +10,19 @@ interface Props {
   publishedAt: Date;
   updatedAt?: Date;
   slug: string;
+  affiliateUrl?: string;
+  affiliateLabel?: string;
 }
 
-const { title, description, publishedAt, updatedAt, slug } = Astro.props;
+const {
+  title,
+  description,
+  publishedAt,
+  updatedAt,
+  slug,
+  affiliateUrl,
+  affiliateLabel,
+} = Astro.props;
 const canonicalPath = `/articles/${slug}/`;
 const siteOrigin = Astro.site ?? new URL(Astro.url.origin);
 const articleUrl = new URL(canonicalPath, siteOrigin);
@@ -85,7 +95,7 @@ const structuredData = {
         <slot />
       </div>
 
-      <ArticleEnding />
+      <ArticleEnding affiliateUrl={affiliateUrl} affiliateLabel={affiliateLabel} />
     </article>
 
     <nav class="article-after-nav" aria-label="記事を読み終えた後のナビゲーション">

@@ -23,6 +23,8 @@ const { Content } = await render(article);
   publishedAt={article.data.publishedAt}
   updatedAt={article.data.updatedAt}
   slug={article.id}
+  affiliateUrl={article.data.affiliateUrl}
+  affiliateLabel={article.data.affiliateLabel}
 >
   <Content />
 </ArticleLayout>
