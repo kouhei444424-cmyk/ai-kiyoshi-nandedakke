@@ -5,6 +5,8 @@ publishedAt: 2026-07-21
 updatedAt: 2026-07-21
 draft: false
 featured: false
+affiliateUrl: "https://al.fanza.co.jp/?lurl=https%3A%2F%2Fvideo.dmm.co.jp%2Fav%2Fcontent%2F%3Fid%3Dh_113spe00004&af_id=kiyoshi0505-001&ch=search_link&ch_id=text"
+affiliateLabel: "万引き スーパーの人妻たち ●メス堕ちしたミニロリ系人妻 ●気弱でヤラレるがままの美乳妻 ●剛毛マン毛のスレンダー巨尻妻"
 ---
 
 車のメーター、180キロくらいまであるものも多い。
@@ -172,4 +174,3 @@ AIがもっと進めば、このルールも変わるかもしれない。
 今日のところは。
 
 でも、たぶんまた変わる。
-

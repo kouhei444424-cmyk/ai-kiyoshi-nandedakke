@@ -224,10 +224,17 @@ if (
   throw new Error("一本目の記事に専用アフィリエイトリンクがありません。");
 }
 
-for (const [index, html] of [speedingArticleHtml, thirdArticleHtml].entries()) {
-  if (!html.includes("とうか") || !html.includes("id%3Doshi017")) {
-    throw new Error(`${index + 2}本目の記事の共通アフィリエイトリンクが変わっています。`);
-  }
+if (
+  !speedingArticleHtml.includes("id%3Dh_113spe00004") ||
+  !speedingArticleHtml.includes("ch=search_link") ||
+  !speedingArticleHtml.includes("万引き スーパーの人妻たち") ||
+  speedingArticleHtml.includes("id%3Doshi017")
+) {
+  throw new Error("二本目の記事に専用アフィリエイトリンクがありません。");
+}
+
+if (!thirdArticleHtml.includes("とうか") || !thirdArticleHtml.includes("id%3Doshi017")) {
+  throw new Error("三本目の記事の共通アフィリエイトリンクが変わっています。");
 }
 
 for (const slug of removedSlugs) {
