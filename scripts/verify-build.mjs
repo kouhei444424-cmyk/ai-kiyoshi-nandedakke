@@ -8,6 +8,7 @@ const secondArticleSlug = "speeding";
 const thirdArticleSlug = "dangerous-men";
 const fourthArticleSlug = "obake-kowai";
 const fifthArticleSlug = "egg-color";
+const sixthArticleSlug = "complete-post-vs-question";
 const removedSlugs = [
   "doryoku-wa-erai",
   "hatarakanai-to-dame",
@@ -21,6 +22,7 @@ const requiredFiles = [
   `articles/${thirdArticleSlug}/index.html`,
   `articles/${fourthArticleSlug}/index.html`,
   `articles/${fifthArticleSlug}/index.html`,
+  `articles/${sixthArticleSlug}/index.html`,
   "about/index.html",
   "robots.txt",
   "sitemap-index.xml",
@@ -95,6 +97,10 @@ const fifthArticleHtml = await readFile(
   join(dist, "articles", fifthArticleSlug, "index.html"),
   "utf8",
 );
+const sixthArticleHtml = await readFile(
+  join(dist, "articles", sixthArticleSlug, "index.html"),
+  "utf8",
+);
 const redirects = await readFile(join(dist, "_redirects"), "utf8");
 
 if (!homeHtml.includes("人をなんで殴っちゃいけないんだっけ。")) {
@@ -115,6 +121,14 @@ if (!homeHtml.includes("おばけって、なんで怖いんだっけ。")) {
 
 if (!homeHtml.includes("冷静に考えたら鶏のたまごって食べちゃいけねぇ色してない？")) {
   throw new Error("トップページに五本目の記事がありません。");
+}
+
+if (
+  !homeHtml.includes(
+    "企業の完璧な告知より、知らないおっさんの素朴な疑問が100倍以上表示されるSNSって何なんだ。",
+  )
+) {
+  throw new Error("トップページに六本目の記事がありません。");
 }
 
 if (
@@ -148,6 +162,14 @@ if (!archiveHtml.includes("おばけって、なんで怖いんだっけ。")) {
 
 if (!archiveHtml.includes("冷静に考えたら鶏のたまごって食べちゃいけねぇ色してない？")) {
   throw new Error("記事一覧に五本目の記事がありません。");
+}
+
+if (
+  !archiveHtml.includes(
+    "企業の完璧な告知より、知らないおっさんの素朴な疑問が100倍以上表示されるSNSって何なんだ。",
+  )
+) {
+  throw new Error("記事一覧に六本目の記事がありません。");
 }
 
 if (
@@ -200,6 +222,14 @@ if (
 }
 
 if (
+  sixthArticleHtml.includes("康平") ||
+  sixthArticleHtml.includes("山口") ||
+  sixthArticleHtml.includes("AIきよし")
+) {
+  throw new Error("六本目の記事に個人名または不要な人格名が残っています。");
+}
+
+if (
   !articleHtml.includes("読む前に、10秒だけ考えてみて。") ||
   articleHtml.includes("THINKING TIME / 10 SEC.") ||
   !articleHtml.includes("「痛いから」以外で。") ||
@@ -227,6 +257,10 @@ if (fourthArticleHtml.includes('class="article__description"')) {
 
 if (fifthArticleHtml.includes('class="article__description"')) {
   throw new Error("五本目の記事ページに不要なサブタイトルが表示されています。");
+}
+
+if (sixthArticleHtml.includes('class="article__description"')) {
+  throw new Error("六本目の記事ページに不要なサブタイトルが表示されています。");
 }
 
 if (
@@ -270,6 +304,17 @@ if (
 }
 
 if (
+  !sixthArticleHtml.includes("読む前に、10秒だけ考えてみて。") ||
+  !sixthArticleHtml.includes("なんで俺なんだよ。") ||
+  !sixthArticleHtml.includes("Meta、身内にも厳しい。") ||
+  !sixthArticleHtml.includes("一言ある人が、ずっとウロウロしている場所") ||
+  !sixthArticleHtml.includes("そこに集まった「いや、それはさ」だった。") ||
+  !sixthArticleHtml.includes("でも、たぶんまた変わる。")
+) {
+  throw new Error("六本目の記事本文が最終稿と一致しません。");
+}
+
+if (
   !articleHtml.includes(
     'data-view-track="/articles/hito-wa-nande-nagutte-wa-ikenai/"',
   ) ||
@@ -284,6 +329,7 @@ for (const [index, html] of [
   thirdArticleHtml,
   fourthArticleHtml,
   fifthArticleHtml,
+  sixthArticleHtml,
 ].entries()) {
   if (
     !html.includes("広告・18禁") ||
@@ -336,6 +382,14 @@ if (
   throw new Error("五本目の記事に専用アフィリエイトリンクがありません。");
 }
 
+if (
+  !sixthArticleHtml.includes("id%3Dsnos00370") ||
+  !sixthArticleHtml.includes("ch=search_link") ||
+  !sixthArticleHtml.includes("新人NO.1STYLE 新卒新人 星空ねる 22歳")
+) {
+  throw new Error("六本目の記事に専用アフィリエイトリンクがありません。");
+}
+
 for (const slug of removedSlugs) {
   if (!redirects.includes(`/articles/${slug}/ /articles/ 302`)) {
     throw new Error(`${slug}: 削除済み記事の転送設定がありません。`);
@@ -348,6 +402,7 @@ for (const [index, html] of [
   thirdArticleHtml,
   fourthArticleHtml,
   fifthArticleHtml,
+  sixthArticleHtml,
 ].entries()) {
   if (
     !html.includes("Threadsで書く") ||
@@ -382,5 +437,5 @@ if (
 }
 
 console.log(
-  "Build verification passed: 5 anonymous articles, view counters, sponsored adult links and sitemap.",
+  "Build verification passed: 6 anonymous articles, view counters, sponsored adult links and sitemap.",
 );
