@@ -14,8 +14,6 @@ const articles = defineCollection({
     updatedAt: z.coerce.date().optional(),
     draft: z.boolean().default(false),
     featured: z.boolean().default(false),
-    affiliateUrl: z.url().optional(),
-    affiliateLabel: z.string().min(1).optional(),
     sharePrompt: z.string().min(1).optional(),
     shareCtaLabel: z.string().min(1).optional(),
   }),

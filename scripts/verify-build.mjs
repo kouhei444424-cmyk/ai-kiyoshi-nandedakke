@@ -335,59 +335,22 @@ for (const [index, html] of [
     !html.includes("広告・18禁") ||
     !html.includes("考えるのが疲れたら行ってらっしゃい。") ||
     !html.includes("18歳未満の方は閲覧できません。") ||
-    !html.includes("https://al.fanza.co.jp/") ||
-    !html.includes("af_id=kiyoshi0505-001") ||
-    !html.includes('rel="sponsored nofollow noopener"') ||
-    !html.includes('data-affiliate-link="true"')
+    !html.includes('class="widget-banner"') ||
+    !html.includes('class="widget-banner-script"') ||
+    !html.includes("widget-view.dmm.co.jp/js/banner_placement.js") ||
+    !html.includes("affiliate_id=kiyoshi0505-001") ||
+    !html.includes("banner_id=1277_640_200") ||
+    !html.includes('data-affiliate-widget="true"')
   ) {
-    throw new Error(`${index + 1}本目の記事末尾に広告リンクまたは18禁表記がありません。`);
+    throw new Error(`${index + 1}本目の記事末尾に広告バナーまたは18禁表記がありません。`);
   }
-}
 
-if (
-  !articleHtml.includes("mkmp00733") ||
-  !articleHtml.includes("ch=search_link") ||
-  !articleHtml.includes("-実写版- 乙葉ちゃんとSEX") ||
-  articleHtml.includes("id%3Doshi017")
-) {
-  throw new Error("一本目の記事に専用アフィリエイトリンクがありません。");
-}
-
-if (
-  !speedingArticleHtml.includes("id%3Dh_113spe00004") ||
-  !speedingArticleHtml.includes("ch=search_link") ||
-  !speedingArticleHtml.includes("万引き スーパーの人妻たち") ||
-  speedingArticleHtml.includes("id%3Doshi017")
-) {
-  throw new Error("二本目の記事に専用アフィリエイトリンクがありません。");
-}
-
-if (!thirdArticleHtml.includes("とうか") || !thirdArticleHtml.includes("id%3Doshi017")) {
-  throw new Error("三本目の記事の共通アフィリエイトリンクが変わっています。");
-}
-
-if (
-  !fourthArticleHtml.includes("id%3Dsqde00028") ||
-  !fourthArticleHtml.includes("ch=search_link") ||
-  !fourthArticleHtml.includes("服を脱いだら性欲お化け")
-) {
-  throw new Error("四本目の記事に専用アフィリエイトリンクがありません。");
-}
-
-if (
-  !fifthArticleHtml.includes("id%3Dhikb00010") ||
-  !fifthArticleHtml.includes("ch=search_link") ||
-  !fifthArticleHtml.includes("イカすパツキン外人天国20人300分")
-) {
-  throw new Error("五本目の記事に専用アフィリエイトリンクがありません。");
-}
-
-if (
-  !sixthArticleHtml.includes("id%3Dsnos00370") ||
-  !sixthArticleHtml.includes("ch=search_link") ||
-  !sixthArticleHtml.includes("新人NO.1STYLE 新卒新人 星空ねる 22歳")
-) {
-  throw new Error("六本目の記事に専用アフィリエイトリンクがありません。");
+  if (
+    html.includes("https://al.fanza.co.jp/") ||
+    html.includes('data-affiliate-link="true"')
+  ) {
+    throw new Error(`${index + 1}本目の記事に旧アフィリエイトリンクが残っています。`);
+  }
 }
 
 for (const slug of removedSlugs) {
@@ -437,5 +400,5 @@ if (
 }
 
 console.log(
-  "Build verification passed: 6 anonymous articles, view counters, sponsored adult links and sitemap.",
+  "Build verification passed: 6 anonymous articles, view counters, adult banner widgets and sitemap.",
 );

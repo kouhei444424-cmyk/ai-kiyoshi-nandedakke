@@ -5,8 +5,6 @@ publishedAt: 2026-07-22
 updatedAt: 2026-07-22
 draft: false
 featured: false
-affiliateUrl: "https://al.fanza.co.jp/?lurl=https%3A%2F%2Fvideo.dmm.co.jp%2Fav%2Fcontent%2F%3Fid%3Dhikb00010&af_id=kiyoshi0505-001&ch=search_link&ch_id=text"
-affiliateLabel: "イカすパツキン外人天国20人300分 丸ごと金髪美女だらけのヌキヌキ祭り！"
 sharePrompt: "よく考えたら変だと思う食べ物は、"
 ---
 

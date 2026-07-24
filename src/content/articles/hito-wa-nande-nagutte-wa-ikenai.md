@@ -5,8 +5,6 @@ publishedAt: 2026-07-20
 updatedAt: 2026-07-20
 draft: false
 featured: true
-affiliateUrl: "https://al.fanza.co.jp/?lurl=https%3A%2F%2Fvideo.dmm.co.jp%2Fav%2Fcontent%2F%3Fid%3Dmkmp00733&af_id=kiyoshi0505-001&ch=search_link&ch_id=text"
-affiliateLabel: "-実写版- 乙葉ちゃんとSEX サークル昼寝屋さんの看板ヒロイン、乙葉ちゃんがついに実写化！！美少女×巨人の超体格差セックスで累計売上7.5万部超えの人気作 南日菜乃"
 sharePrompt: "自分が殴らずに済ませた話は、"
 ---
 

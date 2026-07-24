@@ -1,53 +1,21 @@
----
-interface Props {
-  affiliateUrl?: string;
-  affiliateLabel?: string;
-}
-
-const { affiliateUrl, affiliateLabel } = Astro.props;
-const rawAffiliateUrl = affiliateUrl?.trim() || import.meta.env.AFFILIATE_URL?.trim();
-const rawAdultLinkUrl = import.meta.env.ADULT_LINK_URL?.trim();
-const rawDestinationUrl = rawAffiliateUrl || rawAdultLinkUrl;
-const isAffiliate = Boolean(rawAffiliateUrl);
-const linkLabel = affiliateLabel?.trim() || "とうか";
-let destinationUrl: string | undefined;
-
-if (rawDestinationUrl) {
-  try {
-    const parsedUrl = new URL(rawDestinationUrl);
-    if (parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:") {
-      destinationUrl = parsedUrl.toString();
-    }
-  } catch {
-    destinationUrl = undefined;
-  }
-}
----
-
 <footer class="article-ending">
   <p class="article-ending__lead">考えるのが疲れたら行ってらっしゃい。</p>
-  {
-    destinationUrl && (
-      <>
-        <div class="article-ending__affiliate">
-          <span class="article-ending__ad-label">
-            {isAffiliate ? "広告・18禁" : "18禁"}
-          </span>
-          <a
-            href={destinationUrl}
-            target="_blank"
-            rel={isAffiliate ? "sponsored nofollow noopener" : "nofollow noopener"}
-            data-affiliate-link={isAffiliate ? "true" : undefined}
-            aria-describedby="adult-link-notice"
-          >
-            {linkLabel}
-            <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-        <p id="adult-link-notice" class="article-ending__adult-notice">
-          18歳未満の方は閲覧できません。リンク先は成人向けサイトです。
-        </p>
-      </>
-    )
-  }
+  <div class="article-ending__affiliate">
+    <span class="article-ending__ad-label">広告・18禁</span>
+    <div
+      class="article-ending__banner"
+      data-affiliate-widget="true"
+      aria-describedby="adult-link-notice"
+    >
+      <ins class="widget-banner"></ins>
+      <script
+        is:inline
+        class="widget-banner-script"
+        src="https://widget-view.dmm.co.jp/js/banner_placement.js?affiliate_id=kiyoshi0505-001&banner_id=1277_640_200"
+      ></script>
+    </div>
+  </div>
+  <p id="adult-link-notice" class="article-ending__adult-notice">
+    18歳未満の方は閲覧できません。バナーのリンク先は成人向けサイトです。
+  </p>
 </footer>

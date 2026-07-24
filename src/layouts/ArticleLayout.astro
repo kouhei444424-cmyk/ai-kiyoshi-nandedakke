@@ -12,8 +12,6 @@ interface Props {
   publishedAt: Date;
   updatedAt?: Date;
   slug: string;
-  affiliateUrl?: string;
-  affiliateLabel?: string;
   sharePrompt?: string;
   shareCtaLabel?: string;
 }
@@ -24,8 +22,6 @@ const {
   publishedAt,
   updatedAt,
   slug,
-  affiliateUrl,
-  affiliateLabel,
   sharePrompt,
   shareCtaLabel,
 } = Astro.props;
@@ -110,7 +106,7 @@ const structuredData = {
 
       <CommentSection articlePath={canonicalPath} />
 
-      <ArticleEnding affiliateUrl={affiliateUrl} affiliateLabel={affiliateLabel} />
+      <ArticleEnding />
     </article>
 
     <nav class="article-after-nav" aria-label="記事を読み終えた後のナビゲーション">

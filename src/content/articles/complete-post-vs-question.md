@@ -5,8 +5,6 @@ publishedAt: 2026-07-23
 updatedAt: 2026-07-23
 draft: false
 featured: false
-affiliateUrl: "https://al.fanza.co.jp/?lurl=https%3A%2F%2Fvideo.dmm.co.jp%2Fav%2Fcontent%2F%3Fid%3Dsnos00370&af_id=kiyoshi0505-001&ch=search_link&ch_id=text"
-affiliateLabel: "新人NO.1STYLE 新卒新人 星空ねる 22歳 AV デビュー"
 sharePrompt: "自分がつい口を挟みたくなる投稿は、"
 ---
 
